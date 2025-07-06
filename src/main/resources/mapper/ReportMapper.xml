@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.canteen.mapper.ReportMapper">
+    
+    <!-- 获取交易总金额 -->
+    <select id="getTotalAmount" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(amount), 0) FROM `order` WHERE status IN (1, 2)
+    </select>
+    
+    <!-- 获取总交易次数 -->
+    <select id="getTotalOrders" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM `order` WHERE status IN (1, 2)
+    </select>
+    
+    <!-- 获取套餐销售统计 -->
+    <select id="getSetmealSales" resultType="java.util.Map">
+        SELECT 
+            od.setmeal_id as setmealId,
+            s.name as setmealName,
+            s.price as price,
+            SUM(od.quantity) as salesCount,
+            SUM(od.quantity * od.price) as salesAmount
+        FROM order_detail od
+        LEFT JOIN setmeal s ON od.setmeal_id = s.id
+        LEFT JOIN `order` o ON od.order_id = o.id
+        WHERE od.setmeal_id IS NOT NULL 
+        AND o.status IN (1, 2)
+        GROUP BY od.setmeal_id, s.name, s.price
+        ORDER BY salesCount DESC
+    </select>
+    
+    <!-- 获取菜品销售统计 -->
+    <select id="getDishSales" resultType="java.util.Map">
+        SELECT 
+            sd.dish_id as dishId,
+            d.name as dishName,
+            d.price as price,
+            SUM(od.quantity * sd.copies) as salesCount,
+            SUM(od.quantity * sd.copies * d.price) as salesAmount
+        FROM order_detail od
+        LEFT JOIN setmeal_dish sd ON od.setmeal_id = sd.setmeal_id
+        LEFT JOIN dish d ON sd.dish_id = d.id
+        LEFT JOIN `order` o ON od.order_id = o.id
+        WHERE od.setmeal_id IS NOT NULL 
+        AND o.status IN (1, 2)
+        GROUP BY sd.dish_id, d.name, d.price
+        ORDER BY salesCount DESC
+    </select>
+    
+    <!-- 获取用户订单统计 -->
+    <select id="getUserOrders" resultType="java.util.Map">
+        SELECT 
+            o.user_id as userId,
+            u.username as username,
+            u.user_type as userType,
+            COUNT(*) as orderCount,
+            SUM(o.amount) as totalAmount
+        FROM `order` o
+        LEFT JOIN user u ON o.user_id = u.id
+        WHERE o.status IN (1, 2)
+        GROUP BY o.user_id, u.username, u.user_type
+        ORDER BY totalAmount DESC
+    </select>
+    
+    <!-- 获取用户总数 -->
+    <select id="getTotalUsers" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM user WHERE user_type = 1
+    </select>
+    
+    <!-- 获取订单统计数据 -->
+    <select id="getOrderStatistics" resultType="java.util.Map">
+        SELECT 
+            DATE_FORMAT(o.create_time, '%Y-%m-%d') as date,
+            COUNT(*) as orderCount,
+            SUM(o.amount) as revenue
+        FROM `order` o
+        WHERE o.status IN (1, 2)
+        GROUP BY DATE_FORMAT(o.create_time, '%Y-%m-%d')
+        ORDER BY date DESC
+        LIMIT 30
+    </select>
+    
+</mapper> 

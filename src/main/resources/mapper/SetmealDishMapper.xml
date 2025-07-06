@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.canteen.mapper.SetmealDishMapper">
+    <resultMap id="setmealDishMap" type="com.canteen.entity.SetmealDish">
+        <id property="id" column="id"/>
+        <result property="setmealId" column="setmeal_id"/>
+        <result property="dishId" column="dish_id"/>
+        <result property="dishName" column="dish_name"/>
+        <result property="dishPrice" column="dish_price"/>
+        <result property="copies" column="copies"/>
+    </resultMap>
+
+    <select id="selectBySetmealId" resultMap="setmealDishMap">
+        SELECT * FROM setmeal_dish WHERE setmeal_id = #{setmealId}
+    </select>
+</mapper> 
