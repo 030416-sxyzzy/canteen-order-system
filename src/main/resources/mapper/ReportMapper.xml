@@ -28,7 +28,8 @@
         GROUP BY od.setmeal_id, s.name, s.price
         ORDER BY salesCount DESC
     </select>
-    
+
+
     <!-- 获取菜品销售统计 -->
     <select id="getDishSales" resultType="java.util.Map">
         SELECT 
